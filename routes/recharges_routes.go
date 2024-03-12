@@ -12,6 +12,7 @@ import (
 	"github.com/jorianom/go-recharges-ms/driver"
 	"github.com/jorianom/go-recharges-ms/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,7 +21,6 @@ var validate = validator.New()
 
 func RechargeHandler(w http.ResponseWriter, r *http.Request) {
 	var recharge models.Recharge
-
 	json.NewDecoder(r.Body).Decode(&recharge)
 	err := validate.Struct(&recharge)
 	if err != nil {
@@ -34,13 +34,17 @@ func RechargeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, err := rechargeCollection.InsertOne(context.TODO(), &recharge)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
+	response := models.RechargeResponse{
+		Status:   http.StatusAccepted,
+		Recharge: recharge,
+		Id:       result.InsertedID.(primitive.ObjectID),
+	}
 
-	json.NewEncoder(w).Encode(&result)
+	json.NewEncoder(w).Encode(&response)
 	//w.Write([]byte("Hello World 2"))
 }
 
