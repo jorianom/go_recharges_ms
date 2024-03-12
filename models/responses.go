@@ -9,7 +9,8 @@ type RechargeResponse struct {
 }
 
 type MethodResponse struct {
-	Id     primitive.ObjectID `json:"id,omitempty"`
-	Status int                `json:"status,omitempty" validate:"required"`
-	Method Method             `json:"method,omitempty" validate:"required"`
+	Id      primitive.ObjectID `json:"id,omitempty"`
+	Message string             `json:"message,omitempty"`
+	Status  int                `json:"status,omitempty" validate:"required"`
+	Method  Method             `json:"method,omitempty" validate:"required"`
 }
