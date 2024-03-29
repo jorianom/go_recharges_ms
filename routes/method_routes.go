@@ -132,7 +132,7 @@ func UpdateMethodHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(params)
 		// filter := bson.D{{Key: "id", Value: objId}}
 		//update := bson.D{{Key: "$set", Value: method}}
-		update := bson.M{"user": method.User, "name": method.Name, "titular": method.Titular, "duedate": method.FechaVencimiento, "number": method.Number, "type": method.Type, "sucursal": method.Sucursal}
+		update := bson.M{"user": method.User, "name": method.Name, "titular": method.Titular, "duedate": method.Duedate, "number": method.Number, "type": method.Type, "sucursal": method.Sucursal}
 		result, err := methodsCollection.UpdateOne(context.TODO(), bson.M{"_id": objId}, bson.M{"$set": update})
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)

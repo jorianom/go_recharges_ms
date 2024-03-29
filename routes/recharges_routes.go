@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -20,6 +19,8 @@ var rechargeCollection *mongo.Collection = driver.GetCollection(driver.DB, "rech
 var validate = validator.New()
 
 func RechargeHandler(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("RechargeHandler")
 	var recharge models.Recharge
 	json.NewDecoder(r.Body).Decode(&recharge)
 	err := validate.Struct(&recharge)
@@ -48,11 +49,18 @@ func RechargeHandler(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte("Hello World 2"))
 }
 
+type ResponseGetR struct {
+	Message string            `json:"message"`
+	Status  int               `json:"status"`
+	Data    []models.Recharge `json:"data"`
+}
+
 func HistoryHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	// var recharge models.Recharge
 	var recharges []models.Recharge
-	defer cancel()
+	var res ResponseGetR
+	// defer cancel()
 	params := mux.Vars(r)
 	fmt.Println(params)
 	filter := bson.D{{Key: "user", Value: params["id"]}}
@@ -62,15 +70,31 @@ func HistoryHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 	}
-	defer results.Close(ctx)
-	for results.Next(ctx) {
-		var singleUser models.Recharge
-		if err = results.Decode(&singleUser); err != nil {
 
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-		}
-		recharges = append(recharges, singleUser)
+	if err = results.All(context.TODO(), &recharges); err != nil {
+		panic(err)
 	}
-	json.NewEncoder(w).Encode(&recharges)
+	if len(recharges) == 0 {
+		res = ResponseGetR{
+			Message: "No se encontraron registros " + params["id"],
+			Status:  http.StatusAccepted,
+		}
+	} else {
+		res = ResponseGetR{
+			Message: "Registros obtenidos correctamente " + params["id"],
+			Status:  http.StatusAccepted,
+			Data:    recharges,
+		}
+	}
+	// defer results.Close(ctx)
+	// for results.Next(ctx) {
+	// 	var singleUser models.Recharge
+	// 	if err = results.Decode(&singleUser); err != nil {
+
+	// 		w.WriteHeader(http.StatusBadRequest)
+	// 		w.Write([]byte(err.Error()))
+	// 	}
+	// 	recharges = append(recharges, singleUser)
+	// }
+	json.NewEncoder(w).Encode(&res)
 }

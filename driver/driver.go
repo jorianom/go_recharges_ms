@@ -36,7 +36,7 @@ func Connection() *mongo.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connect DB")
+	fmt.Println("Connect DB1")
 	return client
 }
 
