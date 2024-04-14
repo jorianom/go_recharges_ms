@@ -1,4 +1,4 @@
-name: ci
+name: publish
 
 on:
   push:
@@ -26,4 +26,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: user/app:latest
+          tags: jjrima/go_recharges_ms:latest
