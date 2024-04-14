@@ -1,13 +1,11 @@
 package controllers
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jorianom/go-recharges-ms/driver"
 	"github.com/jorianom/go-recharges-ms/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -22,18 +20,13 @@ func CreateRecharge(recharge models.Recharge) (*mongo.InsertOneResult, error) {
 		fmt.Println("safa")
 	}
 	return nil, nil
-	newRecharge := models.Recharge{
-		Id:       primitive.NewObjectID(),
-		Name:     user.Name,
-		Location: user.Location,
-	}
-	result, err := userCollection.InsertOne(context.TODO(), newRecharge)
-	if err != nil {
-		// panic(err)
-		fmt.Println(err)
-	}
+	// // result, err := userCollection.InsertOne(context.TODO(), newRecharge)
+	// if err != nil {
+	// 	// panic(err)
+	// 	fmt.Println(err)
+	// }
 
-	return result, err
+	// return result, err
 
 	// return c.Status(http.StatusCreated).JSON(models.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
 }

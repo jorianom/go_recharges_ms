@@ -12,8 +12,9 @@ import (
 
 func main() {
 	// Define los parámetros de conexión a RabbitMQ
-	rabbitMQURL := "amqp://guest:guest@localhost:5672/"
-	queueName := "recharges2"
+	rabbitMQHost := "host.docker.internal"
+	rabbitMQURL := "amqp://guest:guest@" + rabbitMQHost + ":5672/"
+	queueName := "recharges"
 
 	// Establece una conexión a RabbitMQ
 	conn, err := amqp.Dial(rabbitMQURL)
@@ -22,14 +23,24 @@ func main() {
 	}
 	defer conn.Close()
 
-	fmt.Printf("Mensaje recibido:")
 	// Crea un canal
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Fatal("Error al abrir un canal:", err)
 	}
+	// Declara la cola (si no existe)
+	_, err = ch.QueueDeclare(
+		queueName, // Nombre de la cola
+		true,      // Duradera
+		false,     // Eliminar cuando no se usa
+		false,     // Exclusiva
+		false,     // No esperar
+		nil,       // Argumentos
+	)
+	if err != nil {
+		log.Fatalf("Error al declarar la cola: %v", err)
+	}
 	defer ch.Close()
-
 	// Consume mensajes de la cola
 	msgs, err := ch.Consume(
 		queueName, // Nombre de la cola
@@ -45,15 +56,11 @@ func main() {
 	}
 
 	// Escucha los mensajes
-	for msg := range msgs {
-		fmt.Printf("Mensaje recibido: %s\n", msg.Body)
-	}
-	// client := driver.Connection()
-	// defer func() {
-	// 	if err := client.Disconnect(context.TODO()); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
+	go func() {
+		for msg := range msgs {
+			fmt.Printf("Recibido un mensaje: %s\n", msg.Body)
+		}
+	}()
 	router := mux.NewRouter()
 	//	s := r.PathPrefix("/api").Subrouter()
 	router.HandleFunc("/api/recharge", routes.RechargeHandler).Methods("POST")
